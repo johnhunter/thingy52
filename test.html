@@ -7,8 +7,31 @@
 </head>
 
 <body>
-  <script src="https://www.puck-js.com/puck.js"></script>
-  <button onclick="Puck.write('LED1.set();\n');">On!</button>
-  <button onclick="Puck.write('LED1.reset();\n');">Off!</button>
+  <main>
+
+    <button id="on-btn">On!</button>
+    <button id="off-btn">Off!</button>
+
+  </main>
+
+
+  <script src="//www.puck-js.com/puck.js"></script>
+  <script>
+    const write = cmd => Puck.write(`${cmd}\n`);
+
+    const clickHandler = ({ target }) => {
+      switch(target.id) {
+        case 'on-btn':
+          write('LED1.set();');
+          break;
+        case 'off-btn':
+          write('LED1.reset();');
+          break;
+      }
+    };
+
+    document.addEventListener('click', clickHandler);
+
+  </script>
 </body>
 </html>
