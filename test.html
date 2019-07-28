@@ -4,23 +4,25 @@
 <head>
   <meta charset="utf-8">
   <title>Test</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 </head>
 
 <body>
-  <main>
+  <header class="container">
     <h1>Thingy52 web controller</h1>
+  </header>
+  <main class="container">
 
     <h2>LED controls</h2>
 
-    <button id="reset-btn">Reset</button>
-    <button id="on-btn">Red light on</button>
-    <button id="off-btn">Red light off</button>
-    <button id="cycle-btn">Cycle light colours</button>
+    <button class="btn btn-large" id="reset-btn">Reset</button>
+    <button class="btn btn-large" id="toggle-btn">Toggle red light</button>
+    <button class="btn btn-large" id="cycle-btn">Cycle light colours</button>
 
   </main>
 
 
-  <script src="//www.puck-js.com/puck.js"></script>
+  <script src="https://www.puck-js.com/puck.js"></script>
   <script>
     const write = cmd => {
       console.info('send: %o', cmd);
@@ -37,17 +39,23 @@
     ];
 
     let currCycle = 0;
+    let toggleOn = false;
 
     const clickHandler = ({ target }) => {
       switch(target.id) {
         case 'reset-btn':
           write('reset();');
           break;
-        case 'on-btn':
-          write('LED1.set();');
+        case 'toggle-btn':
+          if (toggleOn) {
+            write('LED1.reset();');
+          } else {
+            write('LED1.set();');
+          }
+          toggleOn = !toggleOn;
           break;
         case 'off-btn':
-          write('LED1.reset();');
+
           break;
         case 'cycle-btn':
           currCycle = (currCycle + 1) % cycleCommands.length;
