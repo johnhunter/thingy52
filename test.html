@@ -22,7 +22,7 @@
   <script src="//www.puck-js.com/puck.js"></script>
   <script>
     const write = cmd => {
-      if (location.protocol === 'https') {
+      if (location.protocol === 'https:') {
         Puck.write(`${cmd}\n`);
       } else {
         console.info(cmd);
