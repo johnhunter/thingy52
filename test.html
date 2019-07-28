@@ -12,9 +12,10 @@
 
     <h2>LED controls</h2>
 
-    <button id="on-btn">On</button>
-    <button id="off-btn">Off</button>
-    <button id="cycle-btn">Cycle</button>
+    <button id="reset-btn">Reset</button>
+    <button id="on-btn">Red light on</button>
+    <button id="off-btn">Red light off</button>
+    <button id="cycle-btn">Cycle light colours</button>
 
   </main>
 
@@ -22,12 +23,10 @@
   <script src="//www.puck-js.com/puck.js"></script>
   <script>
     const write = cmd => {
+      console.info('send: %o', cmd);
       if (location.protocol === 'https:') {
         Puck.write(`${cmd}\n`);
-      } else {
-        console.info(cmd);
       }
-
     }
 
     const cycleCommands = [
@@ -41,6 +40,9 @@
 
     const clickHandler = ({ target }) => {
       switch(target.id) {
+        case 'reset-btn':
+          write('reset();');
+          break;
         case 'on-btn':
           write('LED1.set();');
           break;
