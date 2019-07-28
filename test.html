@@ -8,16 +8,36 @@
 
 <body>
   <main>
+    <h1>Thingy52 web controller</h1>
 
-    <button id="on-btn">On!</button>
-    <button id="off-btn">Off!</button>
+    <h2>LED controls</h2>
+
+    <button id="on-btn">On</button>
+    <button id="off-btn">Off</button>
+    <button id="cycle-btn">Cycle</button>
 
   </main>
 
 
   <script src="//www.puck-js.com/puck.js"></script>
   <script>
-    const write = cmd => Puck.write(`${cmd}\n`);
+    const write = cmd => {
+      if (location.protocol === 'https') {
+        Puck.write(`${cmd}\n`);
+      } else {
+        console.info(cmd);
+      }
+
+    }
+
+    const cycleCommands = [
+      'digitalWrite([LED3,LED2,LED1],0);',
+      'digitalWrite([LED3,LED2,LED1],1);',
+      'digitalWrite([LED3,LED2,LED1],2);',
+      'digitalWrite([LED3,LED2,LED1],4);',
+    ];
+
+    let currCycle = 0;
 
     const clickHandler = ({ target }) => {
       switch(target.id) {
@@ -27,6 +47,10 @@
         case 'off-btn':
           write('LED1.reset();');
           break;
+        case 'cycle-btn':
+          currCycle = (currCycle + 1) % cycleCommands.length;
+          write(cycleCommands[currCycle]);
+        break;
       }
     };
 
