@@ -6,46 +6,92 @@
   <title>Connect</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script>
-    function connect() {
-      var options = {
+    let gatt;
+
+    const disconnect = () => {
+      gatt && gatt.disconnect();
+    };
+
+    const connect = () => {
+      const options = {
         filters: [
           { namePrefix: 'Thingy' },
         ],
-        optionalServices: ["7b340000-105b-2b38-3a74-2932f884e90e"]
+        optionalServices: ['7b340000-105b-2b38-3a74-2932f884e90e']
       };
-      var busy = false;
-      var gatt, service;
-      // Bring up the Web Bluetooth Device Chooser
-      navigator.bluetooth.requestDevice(options).then(function (device) {
+
+      let busy = false;
+      let service;
+
+
+      navigator.bluetooth.requestDevice(options).then((device) => {
         console.log('Device: ' + JSON.stringify(device));
         return device.gatt.connect();
-      }).then(function (g) {
+      })
+      .then((g) => {
         gatt = g;
         // Get our custom service
-        return gatt.getPrimaryService("7b340000-105b-2b38-3a74-2932f884e90e");
-      }).then(function (service) {
+        return gatt.getPrimaryService('7b340000-105b-2b38-3a74-2932f884e90e');
+      })
+      .then((s) => {
+        service = s;
         // Get the RGB LED characteristic
-        return service.getCharacteristic("7b340001-105b-2b38-3a74-2932f884e90e");
-      }).then(function (characteristic) {
-        // Make a random color
-        var rgb = new Uint8Array([
-          Math.random() * 255,
-          Math.random() * 255,
-          Math.random() * 255]);
-        // Write it to the characteristic
-        return characteristic.writeValue(rgb);
-      }).then(function () {
-        gatt.disconnect();
-        console.log("All Done!");
-      }).catch(function (error) {
-        console.log("Something went wrong. " + error);
+        return service.getCharacteristic('7b340001-105b-2b38-3a74-2932f884e90e');
+      })
+      .then((characteristic) => {
+        const colorPicker = document.querySelector('#color');
+        colorPicker.removeAttribute('disabled');
+        colorPicker.addEventListener('input', (event) => {
+          const col = event.target.value;  // #bbggrr
+          const rgb = new Uint8Array([
+            parseInt(col.substr(5, 2), 16),
+            parseInt(col.substr(3, 2), 16),
+            parseInt(col.substr(1, 2), 16)]);
+          if (busy) return;
+          busy = true;
+          characteristic.writeValue(rgb).then(() => {
+            busy = false;
+          });
+        }, false);
+        // Get the Vibration characteristic
+        return service.getCharacteristic('7b340002-105b-2b38-3a74-2932f884e90e');
+      })
+      .then((characteristic) => {
+        const vibl = document.querySelector('#vibrateleft');
+        const vibr = document.querySelector('#vibrateright');
+        vibl.removeAttribute('disabled');
+        vibr.removeAttribute('disabled');
+
+        const vibChange = (event) => {
+          console.log(vibl.value, vibr.value);
+          if (busy) return;
+          busy = true;
+          const v = new Uint8Array([vibl.value, vibr.value]);
+          characteristic.writeValue(v).then(() => {
+            busy = false;
+          });
+        }
+
+        vibl.addEventListener('input', vibChange, false);
+        vibr.addEventListener('input', vibChange, false);
+      })
+      .then(() => {
+        console.log('Done!');
+      })
+      .catch(function (error) {
+        console.log('Something went wrong.', error);
       });
     }
   </script>
 </head>
 
 <body>
-  <button onclick="connect()">Connect to Web Bluetooth</button>
+  <button class="btn btn-large" onclick="connect()">Connect to Web Bluetooth</button>
+  <button class="btn btn-large" onclick="disconnect()">Disconnect device</button>
+  <input type="color" id="color" value="#e66465" disabled />
+  <input type="range" id="vibrateleft" min="0" max="255" value="0" disabled />
+  <input type="range" id="vibrateright" min="0" max="255" value="0" disabled />
+
 </body>
 
 </html>
