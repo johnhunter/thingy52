@@ -1,0 +1,51 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Connect</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <script>
+    function connect() {
+      var options = {
+        filters: [
+          { namePrefix: 'Thingy' },
+        ],
+        optionalServices: ["7b340000-105b-2b38-3a74-2932f884e90e"]
+      };
+      var busy = false;
+      var gatt, service;
+      // Bring up the Web Bluetooth Device Chooser
+      navigator.bluetooth.requestDevice(options).then(function (device) {
+        console.log('Device: ' + JSON.stringify(device));
+        return device.gatt.connect();
+      }).then(function (g) {
+        gatt = g;
+        // Get our custom service
+        return gatt.getPrimaryService("7b340000-105b-2b38-3a74-2932f884e90e");
+      }).then(function (service) {
+        // Get the RGB LED characteristic
+        return service.getCharacteristic("7b340001-105b-2b38-3a74-2932f884e90e");
+      }).then(function (characteristic) {
+        // Make a random color
+        var rgb = new Uint8Array([
+          Math.random() * 255,
+          Math.random() * 255,
+          Math.random() * 255]);
+        // Write it to the characteristic
+        return characteristic.writeValue(rgb);
+      }).then(function () {
+        gatt.disconnect();
+        console.log("All Done!");
+      }).catch(function (error) {
+        console.log("Something went wrong. " + error);
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <button onclick="connect()">Connect to Web Bluetooth</button>
+</body>
+
+</html>
